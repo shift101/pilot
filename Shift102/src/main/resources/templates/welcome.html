@@ -1,0 +1,38 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Home Page</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.min.js">
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="banner">Shift Rota Demo Application</h1>
+        <div class="section editor">
+            <label for="month">Month
+                <input id="month" type="text" />
+            </label>
+            <br />
+            <label for="year">Year
+                <input id="year" type="text" />
+            </label>
+            <br />
+            <button id="submit">Submit</button>
+        </div>
+        <div class="shifts">
+            <table>
+                <caption>Shifts</caption>
+
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="error">
+        </div>
+    </div>
+</body>
+<script type="text/javascript" th:src="@{/js/home.js}"></script>
+</html>

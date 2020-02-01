@@ -71,6 +71,7 @@ tr:nth-child(even) {
 
 td {
     text-align: center;
+    width:40px;
 }
 td.weekday {
     background-color: green;

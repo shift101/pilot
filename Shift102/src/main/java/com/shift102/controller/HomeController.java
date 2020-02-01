@@ -17,4 +17,11 @@ public class HomeController {
 
         return "welcome"; //view
     }
+	
+	@GetMapping("/edit")
+    public String edit(Model model) {
+        model.addAttribute("message", message);
+
+        return "edit"; //view
+    }
 }

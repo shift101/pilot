@@ -237,7 +237,7 @@ ns.view = (function() {
 						}else if(Array.isArray(userShifts[i].unplannedLeave) && userShifts[i].unplannedLeave.indexOf(dates[j]) > -1){
 							rows=rows + `<td class="unplan-leave">UL</td>`;
 						}else{
-							rows=rows + `<td class="weekday">ND</td>`;
+							rows=rows + `<td class="weekday">WD</td>`;
 						}
 					}
 					rows=rows + `</tr>`;
@@ -249,7 +249,7 @@ ns.view = (function() {
                     rows += `<tr><td class="fname">${people[i].fname}</td><td class="lname">${people[i].lname}</td><td>${people[i].timestamp}</td></tr>`;
                 }
 				*/
-                $('table > tbody').append(rows);
+                $('.shifts table > tbody').append(rows);
             }
         },
         error: function(error_msg) {
@@ -330,6 +330,12 @@ ns.controller = (function(m, v) {
         model.readByMonthYear($month.val(),$year.val());
         
         e.preventDefault();
+    });
+    
+    $('#create').click(function(e) {
+
+            //alert("This is button on click event.");
+            top.location.href = '/edit';
     });
 
     /*$('#reset').click(function() {

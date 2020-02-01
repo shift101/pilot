@@ -7,7 +7,7 @@ public class Shift {
 	public Shift() {
 		super();
 	}
-	public Shift(int month_id, String month_name, int year, List<UserShift> usershift) {
+	public Shift(int month_id, String month_name, int year, List<UserShiftData> usershift) {
 		super();
 		this.month_id = month_id;
 		this.month_name = month_name;
@@ -32,46 +32,46 @@ public class Shift {
 	public void setYear(int year) {
 		this.year = year;
 	}
-	public List<UserShift> getUsershift() {
+	public List<UserShiftData> getUsershift() {
 		return usershift;
 	}
-	public void setUsershift(List<UserShift> usershift) {
+	public void setUsershift(List<UserShiftData> usershift) {
 		this.usershift = usershift;
 	}
 	/**
-	 {"shift":
-	{
-		"month_id": "12",
-		"month_name": "December",
-		"year": "2019",
-		"usershift": [
-		{
-			"user_id": "1",
-			"shift_id":"1",
-			"user_name": "Himanshu Sharma",
-			"shift_name":"General",
-			"shift_time":"0800-1630 IST",
-			"weekoff": [2,3,9,10,16,17,23,24,30,31],
-			"Leave": [4,19]
-		},
-		{
-			"user_id": "2",
-			"shift_id":"2",
-			"user_name": "Deepak Singh",
-			"shift_name":"UK",
-			"shift_time":"0800-1630 IST",
-			"weekoff": [4,5,11,12,18,19,25,26],
-			"Leave": [2,15]
+	 {
+		  "month_id": 12,
+		  "month_name": "DECEMBER",
+		  "year": 2019,
+		  "usershift": [
+		    {
+		      "user_id": 0,
+		      "shift_id": 1,
+		      "user_name": "Himanshu Sharma",
+		      "shift_name": "General",
+		      "shift_time": "0800-1630 IST",
+		      "weekoff": [2,3,9,10,16,17,23,24,30,31],
+		      "leave": [4,13],
+		      "unplannedLeave": null
+		    },
+		    {
+		      "user_id": 1,
+		      "shift_id": 2,
+		      "user_name": "Deepak Singh",
+		      "shift_name": "UK",
+		      "shift_time": "1430-2230 IST",
+		      "weekoff": [3,4,10,11,17,18,24,25,31],
+		      "leave": null,
+		      "unplannedLeave": [6,13]
+		    }
+		  ]
 		}
-		]
-	}
-}
 	 */
 
 	private int month_id;
 	private String month_name;
 	private int year;
-	private List<UserShift> usershift;
+	private List<UserShiftData> usershift;
 
 	// getters and setters
 	/*
@@ -79,4 +79,5 @@ public class Shift {
 	 * ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email +
 	 * "]"; }
 	 */
+
 }

@@ -157,4 +157,3 @@ join exceptiontypes exp on exp.id=edata.exception_id
 where cal.month=12 and cal.year=2019
 group by cal.month,cal.year,user.name,
 exp.exceptionname,shift.shiftname,shift.shiftstart,shift.shiftend,shift.timezone,data.lastupdated,data.lastupdatedby,user.id,shift.id,exp.id
-*/

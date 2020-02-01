@@ -20,23 +20,35 @@
 		<h1 class="banner">Shift Rota Demo Application</h1>
 
 		<div class="section editor">
-			<label for="month">Month <input id="month" type="text" />
+		<div class="row">
+		  <div id="myMonth" class="col-sm-6">
+		  <label>Select Month</label>
+		    <select id="month">
 
-			</label> <br /> <label for="year">Year <input id="year" type="text" />
-			</label> <br />
-			<button id="submit">View</button>
-			<button id="create" >Create/Update</button>
+			</select>
+		  </div>
+		  <div id="myYear" class="col-sm-6">
+		  <label>Select Year</label>
+		    <select id="year">
+			</select>
+		  </div>
+		  </div>
 		</div>
-
+		<div class="alert alert-warning">
+		  <div class="message"></div>
+		</div>
 		<div class="shifts">
-			<table>
+			<table class="table-responsive-lg">
+
 				<tbody>
+				<tr><td></td></tr>
 				</tbody>
+				
 			</table>
 		</div>
-
+		<button type="button" class="btn btn-secondary">Update All</button>
 		<div class="error"></div>
 	</div>
 </body>
-<script type="text/javascript" th:src="@{/js/home.js}"></script>
+<script type="text/javascript" th:src="@{/js/edit.js}"></script>
 </html>

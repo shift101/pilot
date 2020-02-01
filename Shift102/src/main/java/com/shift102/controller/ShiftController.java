@@ -1,12 +1,19 @@
 package com.shift102.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shift102.model.Shift;
+import com.shift102.model.ShiftStat;
+import com.shift102.model.UserStat;
 import com.shift102.repository.ShiftRepository;
+import com.shift102.util.ObjectConverter;
 
 @RestController
 public class ShiftController {
@@ -32,7 +39,7 @@ public class ShiftController {
 		      list.add(userShift);list.add(userShiftD);
 		      Shift shift = new Shift(12, "December", 2019, list);
 		      */
-			   Shift shift = shifts.getShiftByMonthYear();
+			  Shift shift = shifts.getShiftByMonthYear();
 		      return shift;
 		    }
 		   
@@ -41,5 +48,29 @@ public class ShiftController {
 		    {
 			   Shift shift = shifts.getShiftByMonthYear(String.valueOf(month),String.valueOf(year));
 		      return shift;
+		    }
+		   @PostMapping("/shift/update")
+		    public String addShiftInformation(@RequestBody Shift shift)
+		    {
+			   ObjectConverter.printObject(shift);
+		      return "success_post";
+		    }
+		   
+		   @GetMapping("/static/years")
+		    public List<Integer> getYears()
+		    {
+		      return shifts.getYears();
+		    }
+		   
+		   @GetMapping("/static/users")
+		    public List<UserStat> getAllUsers()
+		    {
+		      return shifts.getAllUsers();
+		    }
+		   
+		   @GetMapping("/static/shifts")
+		    public List<ShiftStat> getAllShifts()
+		    {
+		      return shifts.getAllShifts();
 		    }
 }

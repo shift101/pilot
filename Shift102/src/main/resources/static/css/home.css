@@ -73,17 +73,21 @@ td {
     text-align: center;
     width:40px;
 }
-td.weekday {
+td.WD {
     background-color: green;
 }
-td.weekoff {
+td.WO {
     background-color: yellow;
 }
-td.plan-leave {
+td.PL {
     background-color: orange;
 }
-td.unplan-leave {
+td.UL {
     background-color: red;
+}
+
+td.SL {
+    background-color: pink;
 }
 
 .error {

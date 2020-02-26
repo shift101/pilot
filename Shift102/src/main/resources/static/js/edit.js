@@ -6,7 +6,7 @@
 // Create the namespace instance
 let ns = {};
 ns.eventBound=0;
-
+ns.classes=[];
 
 // Create the model instance
 ns.model = (function() {
@@ -86,6 +86,24 @@ ns.model = (function() {
             $.ajax(ajax_options)
             .done(function(data) {
                 ns.shifts=data;
+                //console.log(ns.shifts);
+            })
+            .fail(function(xhr, textStatus, errorThrown) {
+                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+            })			
+			
+        },
+        getExceptions: function() {
+        	let ajax_options = {
+                type: 'GET',
+                url: '/static/exceptions'
+            };
+            $.ajax(ajax_options)
+            .done(function(data) {
+                ns.exceptions=data;
+                for (let i=0, l=ns.exceptions.length; i < l; i++){
+    				ns.classes.push(ns.exceptions[i].excp_name);
+    			}
                 //console.log(ns.shifts);
             })
             .fail(function(xhr, textStatus, errorThrown) {
@@ -184,28 +202,19 @@ ns.view = (function() {
 		  return days;
 		},
 		rotateClass: function(element) {
-			var classes = ['weekday', 'weekoff', 'plan-leave', 'unplan-leave'];
-			var innerText = ['WD', 'WO', 'PL', 'UL'];
-			//console.log('current class:'+element.attr("class"));
+			//console.log('ns.exceptions:'+ns.exceptions);
 			var currentClass=element.attr("class").replace('datetoggle','').trim();
 			//console.log('::'+currentClass+'::');
 			var currentText=element.text();
 			//console.log(element);
 			element.removeClass(currentClass);
 			element.html('');
-			element.addClass(classes[($.inArray(currentClass, classes)+1)%classes.length]);
-			element.html(innerText[($.inArray(currentText, innerText)+1)%innerText.length]);
+			element.addClass(ns.classes[($.inArray(currentClass, ns.classes)+1)%ns.classes.length]);
+			element.html(ns.classes[($.inArray(currentText, ns.classes)+1)%ns.classes.length]);
 
 		},
 		getDaysInMonth: function(month, year) {
-			var weekday = new Array(7);
-			weekday[0] = "Sun";
-			weekday[1] = "Mon";
-			weekday[2] = "Tue";
-			weekday[3] = "Wed";
-			weekday[4] = "Thu";
-			weekday[5] = "Fri";
-			weekday[6] = "Sat";
+			var weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 			
 		  var date = new Date(year, month, 1);
 		  var days = [];
@@ -216,19 +225,7 @@ ns.view = (function() {
 		  return days;
 		},
 		getMonths: function() {
-			var months = new Array(12);
-			months[0] = "Jan";
-			months[1] = "Feb";
-			months[2] = "Mar";
-			months[3] = "Apr";
-			months[4] = "May";
-			months[5] = "Jun";
-			months[6] = "Jul";
-			months[7] = "Aug";
-			months[8] = "Sep";
-			months[9] = "Oct";
-			months[10] = "Nov";
-			months[11] = "Dec";
+			var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 		  return months;
 		},
@@ -280,18 +277,38 @@ ns.view = (function() {
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
 					rows = rows+`<tr class="datarow">`;
-					rows+=`<td class="resourcename" id="user" scope="row" ignore="true" name="user_id" val="`+userShifts[i].user_id+`">`+userShifts[i].user_name+`</td>`;
-					rows+=`<td class="shiftname" id="shift" name="shift_id" ignore="true" val="`+userShifts[i].shift_id+`">`+userShifts[i].shift_name+`</td>`;
-					for (let j=0, k=dates.length; j < k; j++){
-						if(Array.isArray(userShifts[i].weekoff) && userShifts[i].weekoff.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="weekoff datetoggle" id="datedata">WO</td>`;
-						}else if(Array.isArray(userShifts[i].leave) && userShifts[i].leave.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="plan-leave datetoggle" id="datedata">PL</td>`;
-						}else if(Array.isArray(userShifts[i].unplannedLeave) && userShifts[i].unplannedLeave.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="unplan-leave datetoggle" id="datedata">UL</td>`;
-						}else{
-							rows=rows + `<td class="weekday datetoggle" id="datedata">WD</td>`;
+					//rows+=`<td class="resourcename" id="user" scope="row" ignore="true" name="user_id" value="`+userShifts[i].user_id+`">`+userShifts[i].user_name+`</td>`;
+					rows+=`<td class="resourcename"  ignore="true"><select id="user" name="user_id" disabled><option value="0000">-None-</option>`;
+					for (let j=0, l=ns.users.length; j < l; j++){
+						rows = rows+`<option value="`+ns.users[j].userId+`"`;
+						if(userShifts[i].user_id == ns.users[j].userId){
+							rows+=` selected="true"`;
 						}
+						rows+=`>`+ns.users[j].userName+`</option>`;
+					}
+					rows+=`</select></td>`;
+					rows+=`<td class="shiftname" ignore="true"><select id="shift" name="shift_id"><option value="0000">-None-</option>`;
+					for (let j=0, l=ns.shifts.length; j < l; j++){
+						rows = rows+`<option value="`+ns.shifts[j].shift_id+`"`;
+						if(userShifts[i].shift_id == ns.shifts[j].shift_id){
+							rows+=` selected="true"`;
+						}
+						rows+=`>`+ns.shifts[j].shift_name+`</option>`;
+					}
+					rows+=`</select></td>`;
+					console.log('Value of option'+userShifts[i].shift_id);
+					
+					for (let j=0, k=dates.length; j < k; j++){
+						var out=false;
+						$.each(userShifts[i].exceptionData,function(key,value){							
+							if(value.dates.indexOf(dates[j]) > -1){
+								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false">`+value.excp_name+`</td>`;
+								out=true;
+								return false;
+							}							
+						});
+						if(out == false)rows=rows + `<td class="WD datetoggle" id="datedata" ignore="false">WD</td>`;
+												
 					}
 					rows=rows + `</tr>`;
 				}
@@ -310,7 +327,7 @@ ns.view = (function() {
 		    $('table').find('td').click(function(e){
 		    	if($(this).attr("ignore") == 'false'){
 		    		ns.view.rotateClass($(e.target));
-		    	}		 	   
+		    	}
 		 	});
             
 		},
@@ -332,7 +349,7 @@ ns.view = (function() {
 			rows+=`</select></td>`;
 			
 			for (let i=0, l=ns.dates.length; i < l; i++){
-				rows = rows+`<td class="weekday datetoggle" id="datedata" ignore="false">WD</td>`;
+				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false">WD</td>`;
 			}
 			
 			rows+=`</tr>`;
@@ -367,15 +384,15 @@ ns.controller = (function(m, v) {
     let model = m,
         view = v,
         $event_pump = $('body');
-    model.getUsers();model.getShifts();
+    model.getUsers();
+    model.getShifts();
+    model.getExceptions();
 
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
     	//$('.shifts').append('jjhjhjh');
     	view.addMonthDropDown();
     }, 100)
-
-
     
     $('.btn-secondary').click(function(e) {
     	//console.log('uploading ...');
@@ -388,41 +405,54 @@ ns.controller = (function(m, v) {
         	shiftdata['year']=$('#year').val();
         	var userShifts=[]        	
         	$(this).find('.datarow').each(function() {
-        		var i=-1;
+        		var i=1;
         		var ignore=false;
-        		var obj = {};
-        		var weekoff=[];
-            	var leave=[];
-            	var unplanned=[];
+        		var obj= {},weekoffObj= {},leaveObj= {},unplanleaveObj= {},speLeaveObj = {};
+        		var weekoff=[],leave=[],unplanned=[],specialLeave=[],exceptionData=[];
         		$(this).find('td').each(function(){
-        			if($(this).attr("class") == 'resourcename' || $(this).attr("class") == 'shiftname'){
-        				//console.log($(this).attr("name"));
-        				if($(this).attr("name") == 'user_id' || $(this).attr("name") == 'shift_id'){
-        					obj[$(this).attr("name")] = $(this).attr("val");
-        				}else{
-        					if($(this).find('select').val() == "0000"){
-        						ignore=true;
-        						return false;
-        					}
-        					obj[$(this).find('select').attr("name")] = $(this).find('select').val();
-        				}
+        			if($(this).has( "select" ).length == 1){
+    					obj[$(this).find('select').attr("name")] = $(this).find('select').val();
         			}else{
         				var day=$(this).attr("class").replace('datetoggle','').trim();
         				switch(day){
-        				case 'weekoff':weekoff.push(i);break;
-        				case 'plan-leave':leave.push(i);break;
-        				case 'unplan-leave':unplanned.push(i);break;
+        				case 'WO':
+        					weekoff.push(i);
+        					weekoffObj["data_Id"]=$(this).attr("data_id");
+        					weekoffObj["excp_id"]="0";
+        					weekoffObj["dates"]=weekoff;
+        					break;
+        				case 'PL':
+        					leave.push(i);
+        					leaveObj["data_Id"]=$(this).attr("data_id");
+        					leaveObj["excp_id"]="1";
+        					leaveObj["dates"]=leave;
+        					break;
+        				case 'UL':
+        					unplanned.push(i);
+        					unplanleaveObj["data_Id"]=$(this).attr("data_id");
+        					unplanleaveObj["excp_id"]="2";
+        					unplanleaveObj["dates"]=unplanned;
+        					break;
+        				case 'SL':
+        					specialLeave.push(i);
+        					speLeaveObj["data_Id"]=$(this).attr("data_id");
+        					speLeaveObj["excp_id"]="3";
+        					speLeaveObj["dates"]=specialLeave;
+        					break;
         				}
+        				
+        				i+=1;
         			}
         			
-        			i=i+1;
         		});
-        		if(!ignore){
-        			obj["weekoff"] = weekoff;
-            		obj["leave"] = leave;
-            		obj["unplannedLeave"] = unplanned;
-            		userShifts.push(obj);
-        		}
+        		//console.log($.isEmptyObject(speLeaveObj));
+        		if(!$.isEmptyObject(weekoffObj))exceptionData.push(weekoffObj);
+        		if(!$.isEmptyObject(leaveObj))exceptionData.push(leaveObj);
+        		if(!$.isEmptyObject(unplanleaveObj))exceptionData.push(unplanleaveObj);
+        		if(!$.isEmptyObject(speLeaveObj))exceptionData.push(speLeaveObj);
+
+        		obj["exceptionData"]=exceptionData;
+        		userShifts.push(obj);
         		
             });
         	shiftdata['usershift']=userShifts;
@@ -433,7 +463,6 @@ ns.controller = (function(m, v) {
     });
     
     $("#month").change(function() {
-	  monthSelected=$('#month').val();
 	  model.getYears();
 	});
     
@@ -500,9 +529,10 @@ ns.controller = (function(m, v) {
     $event_pump.on('model_update_success', function(e, data) {
     	$('.alert').show();
 		$('.message').html("Update successful");
-		setTimeout(function() { // this will automatically close in 5 secs
+		setTimeout(function() { // this will automatically close in 1 secs
 		      $(".alert").hide();
-		    }, 5000);
+		    }, 1000);
+		model.loadExistingData($('#month').val(),$('#year').val());
     });
 
     $event_pump.on('model_delete_success', function(e, data) {

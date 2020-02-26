@@ -1,6 +1,8 @@
 package com.shift102.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,8 +53,18 @@ public class ShiftController {
 		    }
 		   @PostMapping("/shift/update")
 		    public String addShiftInformation(@RequestBody Shift shift)
-		    {
+		    {			   
+			   shifts.setCalendarId(shift);
+			   if(shift.getCalendar_id()==null) {
+					Map<String,Object> inputMap = new HashMap<String,Object>();
+					inputMap.put("CAL_MONTH", shift.getMonth_id());
+					inputMap.put("CAL_YEAR", shift.getYear());
+					inputMap.put("CAL_LASTUPDATED",new java.sql.Timestamp(new java.util.Date().getTime()) );
+					inputMap.put("CAL_LASTUPDATEDBY", "ADMIN");
+					shift.setCalendar_id(Integer.toString(shifts.insertCalendarItem(inputMap)));
+			   }
 			   ObjectConverter.printObject(shift);
+			   shifts.shiftUpdate(shift);
 		      return "success_post";
 		    }
 		   
@@ -66,6 +78,12 @@ public class ShiftController {
 		    public List<UserStat> getAllUsers()
 		    {
 		      return shifts.getAllUsers();
+		    }
+		   
+		   @GetMapping("/static/exceptions")
+		    public List<com.shift102.model.Exception> getExceptions()
+		    {
+		      return shifts.getAllExceptions();
 		    }
 		   
 		   @GetMapping("/static/shifts")

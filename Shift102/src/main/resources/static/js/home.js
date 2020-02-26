@@ -16,31 +16,56 @@ ns.model = (function() {
         read: function() {
         	/*	let data=
 			  {
-				"month_id": "12",
-				"month_name": "December",
-				"year": "2019",
-				"usershift": [
-				{
-					"user_id": "1",
-					"shift_id":"1",
-					"user_name": "Himanshu Sharma",
-					"shift_name":"General",
-					"shift_time":"0800-1630 IST",
-					"weekoff": [2,3,9,10,16,17,23,24,30,31],
-					"unplanned": [26,27],
-					"leave": [4,19]
-				},
-				{
-					"user_id": "2",
-					"shift_id":"2",
-					"user_name": "Deepak Singh",
-					"shift_name":"UK",
-					"shift_time":"0800-1630 IST",
-					"weekoff": [4,5,11,12,18,19,25,26],
-					"leave": [2,15]
+				   "month_id": 1,
+				   "calendar_id": null,
+				   "month_name": "JANUARY",
+				   "year": 2020,
+				   "usershift":    [
+				            {
+				         "user_id": 0,
+				         "shift_id": 0,
+				         "user_name": "Himanshu Sharma",
+				         "shift_name": "General",
+				         "shift_time": "0800-1630 IST",
+				         "exceptionData":          [
+				                        {
+				               "dates": [4,5,11,12,18,19,25,26],
+				               "excp_id": "0",
+				               "excp_name": "WO",
+				               "data_Id": "0"
+				            },
+				                        {
+				               "dates":[14,24],
+				               "excp_id": "1",
+				               "excp_name": "PL",
+				               "data_Id": "1"
+				            }
+				         ]
+				      },
+				            {
+				         "user_id": 1,
+				         "shift_id": 1,
+				         "user_name": "Deepak Singh",
+				         "shift_name": "UK",
+				         "shift_time": "1430-2230 IST",
+				         "exceptionData":          [
+				                        {
+				               "dates":[6,7,13,14,20,21,27,28
+				               ],
+				               "excp_id": "0",
+				               "excp_name": "WO",
+				               "data_Id": "2"
+				            },
+				                        {
+				               "dates":[29,30],
+				               "excp_id": "2",
+				               "excp_name": "UL",
+				               "data_Id": "3"
+				            }
+				         ]
+				      }
+				   ]
 				}
-				]
-			}
 			;
 			$event_pump.trigger('model_read_success', [data]);
 			*/
@@ -227,18 +252,37 @@ ns.view = (function() {
 			let userShifts=shifts.usershift;
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
-					//console.log(userShifts[i]);
+					console.log(userShifts[i]);
 					rows = rows+`<tr><th scope="row">`+userShifts[i].user_name+`</th><td>`+userShifts[i].shift_name+`</td>`;
 					for (let j=0, k=dates.length; j < k; j++){
-						if(Array.isArray(userShifts[i].weekoff) && userShifts[i].weekoff.indexOf(dates[j]) > -1){
+						var out=false;
+						$.each(userShifts[i].exceptionData,function(key,value){							
+							if(value.dates.indexOf(dates[j]) > -1){
+								rows=rows + `<td class="`+value.excp_name+`">`+value.excp_name+`</td>`;
+								out=true;
+								return false;
+							}
+							
+						});
+						if(out == false)rows=rows + `<td class="WD">WD</td>`;
+						/*if(!(userShifts[i].weekoff == null) && Array.isArray(userShifts[i].weekoff.dates) && userShifts[i].weekoff.dates.indexOf(dates[j]) > -1){
 							rows=rows + `<td class="weekoff">WO</td>`;
-						}else if(Array.isArray(userShifts[i].leave) && userShifts[i].leave.indexOf(dates[j]) > -1){
+							console.log('entering weekoff');
+						}else if(!(userShifts[i].leave == null) && Array.isArray(userShifts[i].leave.dates) && userShifts[i].leave.dates.indexOf(dates[j]) > -1){
 							rows=rows + `<td class="plan-leave">PL</td>`;
-						}else if(Array.isArray(userShifts[i].unplannedLeave) && userShifts[i].unplannedLeave.indexOf(dates[j]) > -1){
+							console.log('entering leave');
+						}else if(!(userShifts[i].unplannedLeave == null) && Array.isArray(userShifts[i].unplannedLeave.dates) && userShifts[i].unplannedLeave.dates.indexOf(dates[j]) > -1){
 							rows=rows + `<td class="unplan-leave">UL</td>`;
-						}else{
+							console.log('entering unplan');
+						}else if(!(userShifts[i].specialLeave == null) && Array.isArray(userShifts[i].specialLeave.dates) && userShifts[i].specialLeave.dates.indexOf(dates[j]) > -1){
+							rows=rows + `<td class="special-leave">SL</td>`;
+							console.log('entering special');
+						}*/
+						
+						/*else{
+							
 							rows=rows + `<td class="weekday">WD</td>`;
-						}
+						}*/
 					}
 					rows=rows + `</tr>`;
 				}
@@ -341,24 +385,6 @@ ns.controller = (function(m, v) {
     /*$('#reset').click(function() {
         view.reset();
     })*/
-
-    $('table > tbody').on('dblclick', 'tr', function(e) {
-        let $target = $(e.target),
-            fname,
-            lname;
-
-        fname = $target
-            .parent()
-            .find('td.fname')
-            .text();
-
-        lname = $target
-            .parent()
-            .find('td.lname')
-            .text();
-
-        view.update_editor(fname, lname);
-    });
 
     // Handle the model events
     $event_pump.on('model_read_success', function(e, data) {

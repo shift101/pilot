@@ -1,5 +1,7 @@
 package com.shift102.model;
 
+import java.util.List;
+
 public class UserShiftData {
 
 	private int user_id;
@@ -7,33 +9,28 @@ public class UserShiftData {
 	private String user_name;
 	private String shift_name;
 	private String shift_time;
-	private int[] weekoff;
-	private int[] leave;
-	private int[] unplannedLeave;
+	private List<ExceptionData> exceptionData;
 	
-	public int[] getUnplannedLeave() {
-		return unplannedLeave;
+	public List<ExceptionData> getExceptionData() {
+		return exceptionData;
 	}
 
-	public void setUnplannedLeave(int[] unplannedLeave) {
-		this.unplannedLeave = unplannedLeave;
+	public void setExceptionData(List<ExceptionData> exceptionData) {
+		this.exceptionData = exceptionData;
 	}
 
 	public UserShiftData() {
 		super();
 	};
 	
-	public UserShiftData(int user_id, int shift_id, String user_name, String shift_name, String shift_time, int[] weekoff,
-			int[] leave,int[] unplannedLeave) {
+	public UserShiftData(int user_id, int shift_id, String user_name, String shift_name, String shift_time, ExceptionData weekoff,
+			ExceptionData leave,ExceptionData unplannedLeave, ExceptionData specialLeave) {
 		super();
 		this.user_id = user_id;
 		this.shift_id = shift_id;
 		this.user_name = user_name;
 		this.shift_name = shift_name;
 		this.shift_time = shift_time;
-		this.weekoff = weekoff;
-		this.leave = leave;
-		this.unplannedLeave = unplannedLeave;
 	}
 	public int getUser_id() {
 		return user_id;
@@ -64,17 +61,5 @@ public class UserShiftData {
 	}
 	public void setShift_time(String shift_time) {
 		this.shift_time = shift_time;
-	}
-	public int[] getWeekoff() {
-		return weekoff;
-	}
-	public void setWeekoff(int[] weekoff) {
-		this.weekoff = weekoff;
-	}
-	public int[] getLeave() {
-		return leave;
-	}
-	public void setLeave(int[] leave) {
-		this.leave = leave;
 	}
 }

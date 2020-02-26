@@ -143,6 +143,6 @@ join calendar on cal_id=DATA_CALENDAR_ID
 join shifts on shift_id=DATA_SHIFT_ID
 join exceptiontypes on excp_id=DATA_EXCEPTION_ID
 join userdata on user_id=DATA_USER_ID
-where cal_month= 1
-and cal_year=2020
+where cal_month= 12
+and cal_year=2019
 **/

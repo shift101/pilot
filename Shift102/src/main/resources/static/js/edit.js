@@ -19,9 +19,6 @@ ns.model = (function() {
         	let ajax_options = {
                 type: 'GET',
                 url: '/shift',
-                //accepts: 'application/json',
-                //contentType: 'application/json',
-                //dataType: 'json'
             };
             $.ajax(ajax_options)
             .done(function(data) {
@@ -32,23 +29,7 @@ ns.model = (function() {
             })			
 			
         },
-        readByMonthYear: function(month,year) {
-        	let ajax_options = {
-                type: 'GET',
-                url: '/shift/'+month+'/'+year,
-                //accepts: 'application/json',
-                //contentType: 'application/json',
-                //dataType: 'json'
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_read_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })			
-			
-        },
+
         getYears: function() {
         	let ajax_options = {
                 type: 'GET',
@@ -71,7 +52,6 @@ ns.model = (function() {
             $.ajax(ajax_options)
             .done(function(data) {
                 ns.users=data;
-                //console.log(ns.users);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -86,7 +66,6 @@ ns.model = (function() {
             $.ajax(ajax_options)
             .done(function(data) {
                 ns.shifts=data;
-                //console.log(ns.shifts);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -104,7 +83,6 @@ ns.model = (function() {
                 for (let i=0, l=ns.exceptions.length; i < l; i++){
     				ns.classes.push(ns.exceptions[i].excp_name);
     			}
-                //console.log(ns.shifts);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -125,7 +103,20 @@ ns.model = (function() {
                 })			
     			
             },
-
+        generateExcel: function(month,year) {
+        	let ajax_options = {
+                    type: 'GET',
+                    url: '/generate/'+month+'/'+year,
+                };
+                $.ajax(ajax_options)
+                .done(function(data) {
+                    //$event_pump.trigger('model_generate_success', [data]);
+                })
+                .fail(function(xhr, textStatus, errorThrown) {
+                    $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+                })			
+    			
+            },
         create: function(data) {
             let ajax_options = {
                 type: 'POST',
@@ -142,40 +133,6 @@ ns.model = (function() {
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
-        },
-        update: function(fname, lname) {
-            let ajax_options = {
-                type: 'PUT',
-                url: 'api/people/' + lname,
-                accepts: 'application/json',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    'fname': fname,
-                    'lname': lname
-                })
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_update_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
-        },
-        'delete': function(lname) {
-            let ajax_options = {
-                type: 'DELETE',
-                url: 'api/people/' + lname,
-                accepts: 'application/json',
-                contentType: 'plain/text'
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_delete_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
         }
     };
 }());
@@ -184,14 +141,9 @@ ns.model = (function() {
 ns.view = (function() {
     'use strict';
 
-    //let $month = $('#month'), $year = $('#year');
 
     // return the API
     return {
-        /*reset: function() {
-            $lname.val('');
-            $fname.val('').focus();
-        },*/
 		getDatesInMonth: function(month, year) {
 		  var date = new Date(year, month, 1);
 		  var days = [];
@@ -202,11 +154,8 @@ ns.view = (function() {
 		  return days;
 		},
 		rotateClass: function(element) {
-			//console.log('ns.exceptions:'+ns.exceptions);
 			var currentClass=element.attr("class").replace('datetoggle','').trim();
-			//console.log('::'+currentClass+'::');
 			var currentText=element.text();
-			//console.log(element);
 			element.removeClass(currentClass);
 			element.html('');
 			element.addClass(ns.classes[($.inArray(currentClass, ns.classes)+1)%ns.classes.length]);
@@ -243,7 +192,6 @@ ns.view = (function() {
 		addYearDropDown: function(data){
 			let rows = ''
 			$('#year').empty();
-			//console.log('Inside view method');
 			rows = `<option value="0" default=true>-None-</option>`;
 			for (let i=0, l=data.length; i < l; i++){
 				rows = rows+`<option value="`+data[i]+`">`+data[i]+`</option>`;
@@ -251,7 +199,6 @@ ns.view = (function() {
 			$('#year').append(rows);
 		},
 		showExistingdataForEdit: function(shifts){
-			//console.log(shifts);
 			let rows = ''
 			let dates=this.getDatesInMonth(shifts.month_id-1,shifts.year);
 			ns.dates=dates;
@@ -277,7 +224,6 @@ ns.view = (function() {
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
 					rows = rows+`<tr class="datarow">`;
-					//rows+=`<td class="resourcename" id="user" scope="row" ignore="true" name="user_id" value="`+userShifts[i].user_id+`">`+userShifts[i].user_name+`</td>`;
 					rows+=`<td class="resourcename"  ignore="true"><select id="user" name="user_id" disabled><option value="0000">-None-</option>`;
 					for (let j=0, l=ns.users.length; j < l; j++){
 						rows = rows+`<option value="`+ns.users[j].userId+`"`;
@@ -296,7 +242,7 @@ ns.view = (function() {
 						rows+=`>`+ns.shifts[j].shift_name+`</option>`;
 					}
 					rows+=`</select></td>`;
-					console.log('Value of option'+userShifts[i].shift_id);
+					//console.log('Value of option'+userShifts[i].shift_id);
 					
 					for (let j=0, k=dates.length; j < k; j++){
 						var out=false;
@@ -317,7 +263,7 @@ ns.view = (function() {
             }
             $('.shifts table > tbody').append(rows);
             $('.shifts table > tbody').append(`<button type="button" class="btn btn-primary add-more-rows" id="add-more-rows">Add</button>`);
-            //console.log(rows);
+            
             $('.shifts').show();
             
             $('.add-more-rows').on('click',function(e) {
@@ -332,7 +278,6 @@ ns.view = (function() {
             
 		},
 		addBlankRow: function() {
-			//console.log('inside adding blank row');
 			let rows = `<tr class="datarow">`;
 				
 			rows+=`<td class="resourcename" ignore="true"><select id="user" name="user_id"><option value="0000" default=true>-None-</option>`;
@@ -340,7 +285,6 @@ ns.view = (function() {
 				rows = rows+`<option value="`+ns.users[i].userId+`">`+ns.users[i].userName+`</option>`;
 			}
 			rows+=`</select></td>`;
-			//console.log(rows);
 			
 			rows+=`<td class="shiftname" ignore="true"><select id="shift" name="shift_id"><option value="0000" default=true>-None-</option>`;
 			for (let i=0, l=ns.shifts.length; i < l; i++){
@@ -381,6 +325,8 @@ ns.view = (function() {
 ns.controller = (function(m, v) {
 	$('.alert').hide();
 	$('.shifts').hide();
+	$('.btn-update').hide();
+	$('.btn-generate').hide();
     let model = m,
         view = v,
         $event_pump = $('body');
@@ -390,15 +336,34 @@ ns.controller = (function(m, v) {
 
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
-    	//$('.shifts').append('jjhjhjh');
     	view.addMonthDropDown();
-    }, 100)
+    }, 100);
     
-    $('.btn-secondary').click(function(e) {
-    	//console.log('uploading ...');
-    	/*$('.table-responsive-lg tr').each(function() {
-    	    console.log('shg sg fj'+$(this));
-    	});*/
+    
+    $("#month").change(function() {
+	  model.getYears();
+	});
+    
+    $("#year").change(function() {
+    	if($('#month').val() != 0 && $('#year').val() != 0){
+    		model.loadExistingData($('#month').val(),$('#year').val());
+    		$('.btn-update').show();
+    		$('.btn-generate').show();
+    	}else{
+    			$('.alert').show();
+    			$('.message').html("Select Month and Year");
+    			setTimeout(function() { // this will automatically close in 5 secs
+    			      $(".alert").hide();
+    			    }, 5000);
+    	}  	  
+  	});
+    
+    $('.btn-generate').click(function(e) {
+    	//model.generateExcel($('#month').val(),$('#year').val());
+    	window.location.href = '/generate/'+$('#month').val()+'/'+$('#year').val();
+    });
+    
+    $('.btn-update').click(function(e) {
         var data = $('.table-responsive-lg').map(function() {
         	var shiftdata={};
         	shiftdata['month_id']=$('#month').val();
@@ -445,7 +410,6 @@ ns.controller = (function(m, v) {
         			}
         			
         		});
-        		//console.log($.isEmptyObject(speLeaveObj));
         		if(!$.isEmptyObject(weekoffObj))exceptionData.push(weekoffObj);
         		if(!$.isEmptyObject(leaveObj))exceptionData.push(leaveObj);
         		if(!$.isEmptyObject(unplanleaveObj))exceptionData.push(unplanleaveObj);
@@ -458,60 +422,13 @@ ns.controller = (function(m, v) {
         	shiftdata['usershift']=userShifts;
             return shiftdata;
         }).get();
-        console.log(JSON.stringify(data[0]));
+        //console.log(JSON.stringify(data[0]));
         model.create(JSON.stringify(data[0]));
     });
-    
-    $("#month").change(function() {
-	  model.getYears();
-	});
-    
-    $("#year").change(function() {
-    	//console.log('Month:'+$('#month').val());
-    	//console.log('Year:'+$('#year').val());
-    	if($('#month').val() != 0 && $('#year').val() != 0){
-    		model.loadExistingData($('#month').val(),$('#year').val());
-    	}else{
-    			$('.alert').show();
-    			$('.message').html("Select Month and Year");
-    			setTimeout(function() { // this will automatically close in 5 secs
-    			      $(".alert").hide();
-    			    }, 5000);
-    	}  	  
-  	});
-    
-    /*$('.add-more-rows').on('click',function(e) {
-    	console.log('adding new row');
-    	view.addBlankRow();
-  	});*/
-
-
-    /*$('#reset').click(function() {
-        view.reset();
-    })*/
-//
-//    $('table > tbody').on('dblclick', 'tr', function(e) {
-//        let $target = $(e.target),
-//            fname,
-//            lname;
-//
-//        fname = $target
-//            .parent()
-//            .find('td.fname')
-//            .text();
-//
-//        lname = $target
-//            .parent()
-//            .find('td.lname')
-//            .text();
-//
-//        view.update_editor(fname, lname);
-//    });
 
     // Handle the model events
     $event_pump.on('model_read_success', function(e, data) {
         view.build_table(data);
-        //view.reset();
     });
     
     $event_pump.on('model_years_success', function(e, data) {

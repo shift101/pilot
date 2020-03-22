@@ -107,15 +107,23 @@ public class ShiftController {
 	}
 
 	@GetMapping("/generate/{month}/{year}")
-	public ResponseEntity<Resource> generateExcel(@PathVariable int month, @PathVariable int year) throws IOException {
-		Shift shift = shifts.getShiftByMonthYear(String.valueOf(month), String.valueOf(year));
-		Resource resource = ShiftHelper.generateExcel(shift);
-
+	public ResponseEntity<byte[]> generateExcel(@PathVariable int month, @PathVariable int year) throws IOException {
+		Shift shift = shifts.getShiftByMonthYearExcel(String.valueOf(month), String.valueOf(year));
+		byte[] out=null;
+		ShiftHelper helper = new ShiftHelper();
+		try {
+			out = helper.generateExcel(shift);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("file length:"+out.length);
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=Shift_Rota_" + month + "_" + year + ".xlsx")// add headers if any
-				.contentLength(resource.contentLength())
-				.contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(resource);
+				.contentLength(out.length)
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+				.body(out);
 	}
 
 	@GetMapping("/static/shifts")

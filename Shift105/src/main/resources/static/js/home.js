@@ -237,18 +237,18 @@ ns.view = (function() {
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
 					//console.log(userShifts[i]);
-					rows = rows+`<tr><th scope="row">`+userShifts[i].user_name+`</th><td>`+userShifts[i].shift_name+`</td>`;
+					rows = rows+`<tr><th scope="row" class="text-nowrap">`+userShifts[i].user_name+`</th><td>`+userShifts[i].shift_name+`</td>`;
 					for (let j=0, k=dates.length; j < k; j++){
 						var out=false;
 						$.each(userShifts[i].exceptionData,function(key,value){							
 							if(value.dates.indexOf(dates[j]) > -1){
-								rows=rows + `<td class="`+value.excp_name+`">`+value.excp_name+`</td>`;
+								rows=rows + `<td class="`+value.excp_name+`"><small>`+value.excp_name+`</small></td>`;
 								out=true;
 								return false;
 							}
 							
 						});
-						if(out == false)rows=rows + `<td class="WD">WD</td>`;
+						if(out == false)rows=rows + `<td class="WD"><small>WD</small></td>`;
 						/*if(!(userShifts[i].weekoff == null) && Array.isArray(userShifts[i].weekoff.dates) && userShifts[i].weekoff.dates.indexOf(dates[j]) > -1){
 							rows=rows + `<td class="weekoff">WO</td>`;
 							console.log('entering weekoff');
@@ -303,6 +303,7 @@ ns.controller = (function(m, v) {
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
     	view.addMonthDropDown();
+    	model.readByMonthYear(12,2019);
     }, 100);
     
     $("#month").change(function() {

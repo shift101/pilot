@@ -108,7 +108,7 @@ public class ShiftRepository extends RepositoryCommon{
 		try {
 			srs = jdbcTemplate
 					.queryForRowSet("SELECT CAL_MONTH,CAL_YEAR,SHIFT_ID,SHIFT_NAME,SHIFT_START,SHIFT_END,SHIFT_TIMEZONE, " + 
-							"USER_ID,USER_NAME,GROUP_CONCAT(EXCP_CODE||'~'||DATA_DATES_PROPOSED SEPARATOR '-') DATES " + 
+							"USER_ID,USER_NAME,GROUP_CONCAT(EXCP_CODE||'~'||DATA_DATES_PROPOSED SEPARATOR '-') DATES,'P' TYPE_OF_DATA " + 
 							"FROM SHIFTDATA " + 
 							"JOIN CALENDAR ON CAL_ID=DATA_CALENDAR_ID " + 
 							"JOIN SHIFTS ON SHIFT_ID=DATA_SHIFT_ID " + 
@@ -118,6 +118,36 @@ public class ShiftRepository extends RepositoryCommon{
 							"AND CAL_YEAR=? AND USER_ID=?" + 
 							"GROUP BY CAL_MONTH,CAL_YEAR,SHIFT_ID,SHIFT_NAME,SHIFT_START,SHIFT_END,SHIFT_TIMEZONE, " + 
 							"USER_ID,USER_NAME",month,year,user);
+			
+			shift=mapper.mapShiftNew(srs,Integer.valueOf(month),Integer.valueOf(year));
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return shift;
+	}
+	
+	public Shift getShiftByMonthYearExcel(String month, String year) {
+		Shift shift=null;
+		if (month == null || year == null) {
+			java.util.Date date = new Date();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+			year = String.valueOf(cal.get(Calendar.YEAR));
+		}
+		SqlRowSet srs;
+		try {
+			srs = jdbcTemplate
+					.queryForRowSet("SELECT CAL_MONTH,CAL_YEAR,SHIFT_ID,SHIFT_NAME,SHIFT_START,SHIFT_END,SHIFT_TIMEZONE,  " + 
+							" USER_ID,USER_NAME,GROUP_CONCAT(EXCP_CODE||'~'||DATA_DATES SEPARATOR '-') DATES, 'P' TYPE_OF_DATA   " + 
+							" FROM SHIFTDATA_PLANNED   " + 
+							" JOIN CALENDAR ON CAL_ID=DATA_CALENDAR_ID   " + 
+							" JOIN SHIFTS ON SHIFT_ID=DATA_SHIFT_ID   " + 
+							" JOIN EXCEPTIONTYPES ON EXCP_ID=DATA_EXCEPTION_ID   " + 
+							" JOIN USERDATA ON USER_ID=DATA_USER_ID   " + 
+							" WHERE CAL_MONTH= ?  AND CAL_YEAR=?  " + 
+							" GROUP BY CAL_MONTH,CAL_YEAR,SHIFT_ID,SHIFT_NAME,SHIFT_START,SHIFT_END,SHIFT_TIMEZONE,  USER_ID,USER_NAME "+
+							"ORDER BY SHIFT_NAME",month,year);
 			
 			shift=mapper.mapShiftNew(srs,Integer.valueOf(month),Integer.valueOf(year));
 		}catch(Exception e) {

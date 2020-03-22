@@ -248,7 +248,7 @@ ns.view = (function() {
 						var out=false;
 						$.each(userShifts[i].exceptionData,function(key,value){							
 							if(value.dates.indexOf(dates[j]) > -1){
-								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false">`+value.excp_name+`</td>`;
+								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false"><small>`+value.excp_name+`</small></td>`;
 								out=true;
 								return false;
 							}							
@@ -293,7 +293,7 @@ ns.view = (function() {
 			rows+=`</select></td>`;
 			
 			for (let i=0, l=ns.dates.length; i < l; i++){
-				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false">WD</td>`;
+				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false"><small>WD</small></td>`;
 			}
 			
 			rows+=`</tr>`;

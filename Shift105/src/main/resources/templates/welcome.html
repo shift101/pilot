@@ -5,14 +5,15 @@
 <meta charset="utf-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Application Home Page</title>
-<link rel="stylesheet" type="text/css" th:href="@{/css/home.css}" />
+<title>Resource Planning and Management</title>
+
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
 <link rel="stylesheet"
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
 	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
 	crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" th:href="@{/css/home.css}" />
 <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script
 	src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
@@ -20,14 +21,16 @@
 	crossorigin="anonymous"></script>
 
 </head>
-<body style="background-color: #f1f1f1;">
+<body>
 	<div class="container">
 		<div class="header">
 			<img class="img-responsive brand" src="/images/logo.png" /> <span
 				class="">Resource Planning and Management</span>
 			<div class="header-right">
 				<a class="active" href="/">Home</a> <a href="/planned">Planned</a> <a
-					href="/actual">Actual</a> <a href="/variance">Variance</a>
+					href="/actual">Actual</a> <a href="/variance">Plan Variance</a> <a
+					href="/attendance">Actual Variance</a><a
+					href="/upload">Import</a>
 
 			</div>
 		</div>
@@ -41,6 +44,7 @@
 				</div>
 				<div id="myYear" class="col-sm-6">
 					<label>Select Year</label> <select id="year">
+						<option value="0" selected>-None-</option>
 					</select>
 				</div>
 			</div>

@@ -14,11 +14,8 @@
 	crossorigin="anonymous">
 <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script
-	src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-	integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-	crossorigin="anonymous"></script>
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}" />
-
 </head>
 <body>
 	<div class="container">
@@ -26,45 +23,24 @@
 			<img class="img-responsive brand" src="/images/logo.png" /> <span
 				class="">Resource Planning and Management</span>
 			<div class="header-right">
-				<a href="/">Home</a> <a href="/planned">Planned</a> <a class="active"
+				<a href="/">Home</a> <a href="/planned">Planned</a> <a
 					href="/actual">Actual</a> <a href="/variance">Plan Variance</a> <a
-					href="/attendance">Actual Variance</a><a
+					href="/attendance">Actual Variance</a><a class="active"
+					href="import">Import</a><a
 					href="/upload">Import</a>
 
 			</div>
 		</div>
 
 		<div class="section editor">
-			<div class="row">
-				<div id="myMonth" class="col-sm-6">
-					<label>Select Month</label> <select id="month">
+			<p>Upload the Attendance File</p>
+			<form action="/import" method="post" enctype="multipart/form-data">
+				<input type="file" th:name="file" accept=".xls,xlsx"> <input
+					th:type="submit" value="Import" />
 
-					</select>
-				</div>
-				<div id="myYear" class="col-sm-6">
-					<label>Select Year</label> <select id="year">
-					</select>
-				</div>
-			</div>
-		</div>
-		<div class="alert alert-warning">
-			<div class="message"></div>
-		</div>
-		<div class="shifts">
-			<table class="table-responsive-lg">
-
-				<tbody>
-					<tr>
-						<td></td>
-					</tr>
-				</tbody>
-
-			</table>
-		</div>
-		<button type="button" class="btn btn-secondary btn-update">Update
-			All</button>
-		<div class="error"></div>
+			</form>
+			<div th:if="${message}" th:text="${message}" class="alert alert-warning"></div>
+	</div>
 	</div>
 </body>
-<script type="text/javascript" th:src="@{/js/actual.js}"></script>
 </html>

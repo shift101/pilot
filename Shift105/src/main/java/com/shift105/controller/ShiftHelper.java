@@ -1,8 +1,12 @@
 package com.shift105.controller;
 
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,6 +15,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -18,15 +23,28 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import com.shift105.model.Attendance;
 import com.shift105.model.DayProp;
 import com.shift105.model.Shift;
 import com.shift105.model.UserShiftData;
+import com.shift105.repository.ShiftRepository;
 
+@Component
 public class ShiftHelper {
+	@Autowired
+	private ShiftRepository shifts;
 
 	HashMap<String, CellStyle> cellStyles;
+	private static DecimalFormat df2 = new DecimalFormat("#.##");
+	private int headerRow = 0;
+	private int empIdCol = 1;
 
 	public byte[] generateExcel(Shift shift) throws Exception {
 		Workbook wb = new XSSFWorkbook();
@@ -360,6 +378,65 @@ public class ShiftHelper {
 		style.setBorderTop(BorderStyle.THIN);
 		style.setTopBorderColor(IndexedColors.BLACK.getIndex());
 		return style;
+	}
+
+
+	public List<Attendance> mapAttendanceSheet(XSSFSheet sheetAt) {
+		XSSFRow row;
+		XSSFCell cell;
+		SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss");
+		XSSFRow header =sheetAt.getRow(headerRow);
+		int colCount = header.getPhysicalNumberOfCells()-1;
+		int rowCount=sheetAt.getPhysicalNumberOfRows();
+		ArrayList<String> dates = new ArrayList<String>();
+		ArrayList<Attendance> attList = new ArrayList<Attendance>();
+		ArrayList<Integer> empList = shifts.getExistingEmpId();
+		Attendance att;
+		for(int k=2;k<colCount;k++) {
+			//System.out.println(getDBDate(header.getCell(k).getStringCellValue()));
+			dates.add(getDBDate(header.getCell(k).getStringCellValue()));
+		}
+		for(int i=1;i<rowCount;i++) {
+			row=sheetAt.getRow(i);
+			if(!empList.contains(new Double(row.getCell(1).getNumericCellValue()).intValue()))continue;
+			for(int j=2;j<row.getLastCellNum()-1;j++) {
+				cell=row.getCell(j);
+				att = new Attendance();
+				att.setDate(dates.get(j-2));
+				att.setEmp_id(new Double(row.getCell(1).getNumericCellValue()).intValue());
+                //System.out.print((new Double(row.getCell(1).getNumericCellValue()).intValue())+"%");
+                if(DateUtil.isCellDateFormatted(cell) || cell.getDateCellValue()==null){
+			    	 Date date = cell.getDateCellValue();
+			    	 Double punchTime= date==null?0:getPunchTime(formatTime.format(date));
+			    	 //System.out.print(punchTime+"!");
+			    	 att.setPunch_time(punchTime);
+			     }
+                attList.add(att);
+			}
+			//System.out.println();
+		}
+		return attList;
+		
+	}
+
+
+	private double getPunchTime(String format) {
+		String[] str = format.split(":");
+		return Double.parseDouble(df2.format((Double.parseDouble(str[0]))+(Double.parseDouble(str[1])/60))) ;
+	}
+
+
+	private String getDBDate(String stringCellValue) {
+		SimpleDateFormat formatDate = new SimpleDateFormat("dd/mm/yyyy");
+		String str="";
+		try {
+			Date date = formatDate.parse(stringCellValue);
+			str = new SimpleDateFormat("yyyy-mm-dd").format(date);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return str;
 	}
 
 }

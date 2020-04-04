@@ -207,13 +207,13 @@ ns.view = (function() {
 
             // clear the table
             $('.shifts table > tbody').empty();
-			rows+=`<tr><td></td><td></td>`;
+			rows+=`<tr class="head"><td></td><td></td>`;
 			for (let i=0, l=days.length; i < l; i++){
 				rows = rows+`<th scope="col">`+days[i]+`</th>`;
 			}
 			rows+=`</tr>`;
 			
-			rows+=`<tr><td>Resource</td><td>Shift</td>`;
+			rows+=`<tr class="head"><td>Resource</td><td>Shift</td>`;
 			for (let i=0, l=dates.length; i < l; i++){
 				rows = rows+`<th scope="col">`+dates[i]+`</th>`;
 			}
@@ -223,7 +223,7 @@ ns.view = (function() {
 			let userShifts=shifts.usershift;
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
-					rows = rows+`<tr class="datarow">`;
+					rows = rows+`<tr class="datarow small">`;
 					rows+=`<td class="resourcename"  ignore="true"><select id="user" name="user_id" disabled><option value="0000">-None-</option>`;
 					for (let j=0, l=ns.users.length; j < l; j++){
 						rows = rows+`<option value="`+ns.users[j].userId+`"`;
@@ -248,12 +248,12 @@ ns.view = (function() {
 						var out=false;
 						$.each(userShifts[i].exceptionData,function(key,value){							
 							if(value.dates.indexOf(dates[j]) > -1){
-								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false"><small>`+value.excp_name+`</small></td>`;
+								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false">`+value.excp_name+`</td>`;
 								out=true;
 								return false;
 							}							
 						});
-						if(out == false)rows=rows + `<td class="WD datetoggle" id="datedata" ignore="false"><small>WD</small></td>`;
+						if(out == false)rows=rows + `<td class="WD datetoggle" id="datedata" ignore="false"></td>`;
 												
 					}
 					rows=rows + `</tr>`;
@@ -265,10 +265,7 @@ ns.view = (function() {
             //$('.shifts table > tbody').append(`<button type="button" class="btn btn-primary add-more-rows" id="add-more-rows">Add</button>`);
             
             $('.shifts').show();
-            
-            $('.add-more-rows').on('click',function(e) {
-            	ns.view.addBlankRow();
-          	});
+
 			$('table').find('td').unbind();
 		    $('table').find('td').click(function(e){
 		    	if($(this).attr("ignore") == 'false'){
@@ -277,36 +274,7 @@ ns.view = (function() {
 		 	});
             
 		},
-		addBlankRow: function() {
-			let rows = `<tr class="datarow">`;
-				
-			rows+=`<td class="resourcename" ignore="true"><select id="user" name="user_id"><option value="0000" default=true>-None-</option>`;
-			for (let i=0, l=ns.users.length; i < l; i++){
-				rows = rows+`<option value="`+ns.users[i].userId+`">`+ns.users[i].userName+`</option>`;
-			}
-			rows+=`</select></td>`;
-			
-			rows+=`<td class="shiftname" ignore="true"><select id="shift" name="shift_id"><option value="0000" default=true>-None-</option>`;
-			for (let i=0, l=ns.shifts.length; i < l; i++){
-				rows = rows+`<option value="`+ns.shifts[i].shift_id+`">`+ns.shifts[i].shift_name+`</option>`;
-			}
-			rows+=`</select></td>`;
-			
-			for (let i=0, l=ns.dates.length; i < l; i++){
-				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false"><small>WD</small></td>`;
-			}
-			
-			rows+=`</tr>`;
-			$('.table-responsive-lg tr:last').after(rows);
-			$('table').find('td').unbind();
-		    $('table').find('td').click(function(e){
-		    	if($(this).attr("ignore") == 'false'){
-		    		ns.view.rotateClass($(e.target));
-		    	}		 	   
-		 	});
-			
-        },
-        update_editor: function(fname, lname) {
+		update_editor: function(fname, lname) {
             $lname.val(lname);
             $fname.val(fname).focus();
         },
@@ -327,6 +295,7 @@ ns.controller = (function(m, v) {
 	$('.shifts').hide();
 	$('.btn-update').hide();
 	$('.btn-generate').hide();
+	$('.error').hide();
     let model = m,
         view = v,
         $event_pump = $('body');

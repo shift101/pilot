@@ -54,10 +54,10 @@ public class RepositoryCommon {
 	
 	public List<com.shift105.model.Exception> getAllExceptions() {
 		SqlRowSet srs = jdbcTemplate
-				.queryForRowSet("SELECT EXCP_ID,EXCP_CODE FROM EXCEPTIONTYPES");
+				.queryForRowSet("SELECT EXCP_ID,EXCP_CODE,EXCP_PLAN FROM EXCEPTIONTYPES");
 		List<com.shift105.model.Exception> excp= new ArrayList<com.shift105.model.Exception>();
 		while (srs.next()) {
-			excp.add(new com.shift105.model.Exception(srs.getInt("EXCP_ID"),srs.getString("EXCP_CODE")));
+			excp.add(new com.shift105.model.Exception(srs.getInt("EXCP_ID"),srs.getString("EXCP_CODE"),srs.getString("EXCP_PLAN")));
 		}
 
 		return excp;

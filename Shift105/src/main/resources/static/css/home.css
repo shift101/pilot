@@ -10,13 +10,17 @@
 	background-color: #f1f1f1;
 }
 
+body {
+	background-color: #f1f1f1;
+	font-family: Roboto;
+}
+
 body, .ui-btn {
 	font-family: Roboto;
 }
 
 .container {
 	/* padding: 10px; */
-	background-color: #f1f1f1;
 }
 
 .banner {
@@ -86,9 +90,13 @@ td {
 	text-align: center;
 	width: 40px;
 }
+tr.head {
+	background-color: #c6bbac;
+	color: white;
+}
 
 td.WD {
-	background-color: #c4ffc4;
+	background-color: #ffffff;
 }
 
 td.WO {
@@ -96,7 +104,7 @@ td.WO {
 }
 
 td.PL {
-	background-color: #ffdea2;
+	background-color: #4aa5ff;
 }
 
 td.UL {
@@ -115,15 +123,11 @@ td.SL {
 	border: 1px solid lightgrey;
 	border-radius: 3px;
 	background-color: #fbb;
-	visibility: hidden;
+	/* visibility: hidden; */
 }
 
 ul {
 	list-style-type: none;
-}
-
-body {
-	font-family: Verdana, sans-serif;
 }
 
 /* Month header */

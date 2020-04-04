@@ -69,11 +69,12 @@ public class Shift {
 	 */
 
 	private int month_id;
-	private String calendar_id;
-	public String getCalendar_id() {
+	private int calendar_id;
+
+	public int getCalendar_id() {
 		return calendar_id;
 	}
-	public void setCalendar_id(String calendar_id) {
+	public void setCalendar_id(int calendar_id) {
 		this.calendar_id = calendar_id;
 	}
 	private String month_name;

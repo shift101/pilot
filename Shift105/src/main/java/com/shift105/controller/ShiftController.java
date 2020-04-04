@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +15,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shift105.model.AttendanceVariance;
 import com.shift105.model.Shift;
 import com.shift105.model.ShiftStat;
 import com.shift105.model.UserStat;
 import com.shift105.repository.ShiftRepository;
-import com.shift105.util.ObjectConverter;
 
 @RestController
 public class ShiftController {
 
 	@Autowired
 	private ShiftRepository shifts;
+	@Autowired
+	private ShiftHelper helper;
 
 	@GetMapping("/shift")
 	public Shift getShifts() {
@@ -44,6 +45,11 @@ public class ShiftController {
 	public Shift getShiftsByMonthYear(@PathVariable int month, @PathVariable int year) {
 		Shift shift = shifts.getShiftByMonthYear(String.valueOf(month), String.valueOf(year));
 		return shift;
+	}
+	
+	@GetMapping("/shift/calendar/{month}/{year}")
+	public int getCalendarId(@PathVariable int month, @PathVariable int year) {
+		return shifts.getCalendarId(month, year);
 	}
 	
 	@GetMapping("/shift/actual/{month}/{year}")
@@ -70,13 +76,13 @@ public class ShiftController {
 		 * this method will insert/update both the planned and actuals with same values.
 		 */
 		shifts.setCalendarId(shift);
-		if (shift.getCalendar_id() == null) {
+		if (shift.getCalendar_id() == 0) {
 			Map<String, Object> inputMap = new HashMap<String, Object>();
 			inputMap.put("CAL_MONTH", shift.getMonth_id());
 			inputMap.put("CAL_YEAR", shift.getYear());
 			inputMap.put("CAL_LASTUPDATED", new java.sql.Timestamp(new java.util.Date().getTime()));
 			inputMap.put("CAL_LASTUPDATEDBY", "ADMIN");
-			shift.setCalendar_id(Integer.toString(shifts.insertCalendarItem(inputMap)));
+			shift.setCalendar_id(shifts.insertCalendarItem(inputMap));
 		}
 		//ObjectConverter.printObject(shift);
 		shifts.shiftUpdate(shift);
@@ -110,7 +116,6 @@ public class ShiftController {
 	public ResponseEntity<byte[]> generateExcel(@PathVariable int month, @PathVariable int year) throws IOException {
 		Shift shift = shifts.getShiftByMonthYearExcel(String.valueOf(month), String.valueOf(year));
 		byte[] out=null;
-		ShiftHelper helper = new ShiftHelper();
 		try {
 			out = helper.generateExcel(shift);
 		} catch (Exception e) {
@@ -130,4 +135,10 @@ public class ShiftController {
 	public List<ShiftStat> getAllShifts() {
 		return shifts.getAllShifts();
 	}
+	
+	@GetMapping("/shift/att_variance/{month}/{year}")
+	public List<AttendanceVariance> getAttendanceVariance(@PathVariable String month, @PathVariable String year) {
+		return shifts.getAttendanceVariance(month, year);
+	}
+	
 }

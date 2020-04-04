@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Resource Planning and Management</title>
+<title>Application Home Page</title>
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
 <link rel="stylesheet"
@@ -26,9 +26,9 @@
 		<div class="header">
 			<img class="img-responsive brand" src="/images/logo.png"/>
 			<span class="">Resource Planning and Management</span>
-						<div class="header-right">
+			<div class="header-right">
 				<a href="/">Home</a> <a href="/planned">Planned</a> <a
-					href="/actual">Actual</a> <a class="active" href="/variance">Plan Variance</a> <a
+					href="/actual">Actual</a> <a href="/variance">Plan Variance</a> <a class="active"
 					href="/attendance">Actual Variance</a><a
 					href="/upload">Import</a>
 
@@ -62,9 +62,8 @@
 
 			</table>
 		</div>
-		<!-- <button type="button" class="btn btn-secondary btn-update">Update All</button> -->
 		<div class="error"></div>
 	</div>
 </body>
-<script type="text/javascript" th:src="@{/js/variance.js}"></script>
+<script type="text/javascript" th:src="@{/js/att_variance.js}"></script>
 </html>

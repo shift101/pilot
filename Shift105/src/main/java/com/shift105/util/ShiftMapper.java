@@ -3,14 +3,15 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
+import com.shift105.model.AttendanceVariance;
 import com.shift105.model.DayProp;
 import com.shift105.model.ExceptionData;
+import com.shift105.model.PunchTimeDeficit;
 import com.shift105.model.Shift;
 import com.shift105.model.UserShiftData;
 
@@ -38,7 +39,6 @@ public class ShiftMapper {
 				userShift.setUser_name(srs.getString("USER_NAME"));
 				userShift.setShift_id(srs.getInt("SHIFT_ID"));
 				userShift.setUser_id(srs.getInt("USER_ID"));
-				// userShift.setData_id(srs.getInt("DATA_ID"));
 				userShift.setShift_time(srs.getString("SHIFT_START") + "-" + srs.getString("SHIFT_END") + " "
 						+ srs.getString("SHIFT_TIMEZONE"));
 				setExceptions(srs, userShift);
@@ -149,5 +149,38 @@ public class ShiftMapper {
 			
 		}
 		return userShift;
+	}
+
+	public List<AttendanceVariance> mapTimeDeficit(SqlRowSet srs) {
+		List<AttendanceVariance> shift = new ArrayList<AttendanceVariance>();
+		AttendanceVariance var=null;
+		int user=-1;
+		while (srs.next()) {
+			if(user != srs.getInt("USER_ID")) {
+				var=new AttendanceVariance();
+				var.setEmp_id(srs.getInt("ATT_EMP_ID"));
+				var.setUser_id(srs.getInt("USER_ID"));
+				var.setUser_name(srs.getString("USER_NAME"));
+				shift.add(var);
+				user=srs.getInt("USER_ID");
+			}
+			setPunchTimeDeficit(var,srs);
+		}
+		return shift;
+	}
+
+	private void setPunchTimeDeficit(AttendanceVariance var,SqlRowSet srs) {
+		PunchTimeDeficit ptd = new PunchTimeDeficit();
+		ptd.setDate(srs.getInt("ATT_DATE"));
+		ptd.setTimeDeficit(srs.getDouble("ATT_PUNCHTIME"));
+		if(var.getTimeDeficitList() == null) {
+			ArrayList<PunchTimeDeficit> list = new ArrayList<PunchTimeDeficit>();
+			list.add(ptd);
+			var.setTimeDeficitList(list);
+		}else {
+			var.getTimeDeficitList().add(ptd);
+		}
+		
+		
 	}
 }

@@ -2,6 +2,8 @@ package com.shift105.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -12,11 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
+import com.shift105.model.Attendance;
+import com.shift105.model.AttendanceVariance;
 import com.shift105.model.DayProp;
 import com.shift105.model.ExceptionData;
 import com.shift105.model.Shift;
@@ -29,8 +34,9 @@ public class ShiftRepository extends RepositoryCommon{
 	
 	@Autowired
 	private ShiftMapper mapper;
-	private final int INSERT_BATCH_SIZE = 100;
-	private final int UPDATE_BATCH_SIZE = 100;
+	
+	private final int INSERT_BATCH_SIZE = 1;
+	private final int UPDATE_BATCH_SIZE = 1;
 	private final String insertQuery="INSERT INTO SHIFTDATA_PLANNED(DATA_CALENDAR_ID, DATA_SHIFT_ID, DATA_EXCEPTION_ID, "
 			+ "DATA_USER_ID, DATA_DATES, DATA_LASTUPDATED, DATA_LASTUPDATEDBY) VALUES(?,?,?,?,?,?,?)";
 	private final String insertActualQuery="INSERT INTO SHIFTDATA_ACTUAL(DATA_CALENDAR_ID, DATA_SHIFT_ID, DATA_EXCEPTION_ID, "
@@ -39,6 +45,11 @@ public class ShiftRepository extends RepositoryCommon{
 			+ "DATA_USER_ID=?, DATA_DATES=?, DATA_LASTUPDATED=?, DATA_LASTUPDATEDBY=? where DATA_ID=?";
 	private final String updateActualQuery="UPDATE SHIFTDATA_ACTUAL set DATA_CALENDAR_ID=?, DATA_SHIFT_ID=?, DATA_EXCEPTION_ID=?, "
 			+ "DATA_USER_ID=?, DATA_DATES=?, DATA_LASTUPDATED=?, DATA_LASTUPDATEDBY=? where DATA_ID=?";
+	private final String attMergeQuery = "MERGE INTO ATTENDANCE  USING (VALUES(?,?,?,?,?,?)) " + 
+			"   AS VALS(A,B,C,D,E,F) ON ATTENDANCE.ATT_DATE = VALS.A AND ATTENDANCE.ATT_EMP_ID=VALS.B " + 
+			"   WHEN MATCHED THEN UPDATE SET ATTENDANCE.ATT_PUNCHTIME = VALS.C,ATTENDANCE.ATT_LASTUPDATED=VALS.D, ATTENDANCE.ATT_LASTUPDATEDBY=VALS.E,ATTENDANCE.ATT_CALENDAR_ID=VALS.F " + 
+			"   WHEN NOT MATCHED THEN INSERT(ATT_DATE,ATT_EMP_ID,ATT_PUNCHTIME,ATT_CALENDAR_ID,ATT_LASTUPDATED,ATT_LASTUPDATEDBY) VALUES (VALS.A,VALS.B,VALS.C,VALS.F,VALS.D,VALS.E)";
+	private final String getCalIdQuery = "SELECT CAL_ID FROM CALENDAR WHERE CAL_MONTH=? AND CAL_YEAR=?";
 
 	public Shift getShiftByMonthYear() {
 
@@ -294,7 +305,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -315,7 +326,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -344,7 +355,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -372,7 +383,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -393,7 +404,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -422,7 +433,7 @@ public class ShiftRepository extends RepositoryCommon{
 						@Override
 						public void setValues(PreparedStatement pStmt, int j)
 								throws SQLException {
-							Map<String,Object> map = shiftData.get(j);
+							Map<String,Object> map = batchList.get(j);
 
 							pStmt.setInt(1, Integer.parseInt(map.get("DATA_CALENDAR_ID").toString()));
 							pStmt.setInt(2, Integer.parseInt(map.get("DATA_SHIFT_ID").toString()));
@@ -481,14 +492,31 @@ public class ShiftRepository extends RepositoryCommon{
 
 		return id;
 	}
+	
+	@Cacheable
+	public ArrayList<Integer> getExistingEmpId() {
+		System.out.println(System.currentTimeMillis());
+		SqlRowSet srs = jdbcTemplate.queryForRowSet("SELECT DISTINCT USER_EMP_ID FROM USERDATA WHERE USER_IS_ACTIVE='Y' AND USER_EMP_ID IS NOT NULL");
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		while(srs.next()) {
+			list.add(srs.getInt("USER_EMP_ID"));
+		}
+		System.out.println(System.currentTimeMillis());
+		return list;
+	}
+	
+	public int getCalendarId(int month, int year) {
+		SqlRowSet srs = jdbcTemplate.queryForRowSet(getCalIdQuery, month,year);
+		int cal_id=-1;
+		while(srs.next()) {
+			cal_id = srs.getInt("CAL_ID");
+		}
+		return cal_id;
+
+	}
 
 	public void setCalendarId(Shift shift) {
-		SqlRowSet srs = jdbcTemplate.queryForRowSet("SELECT CAL_ID FROM CALENDAR WHERE CAL_MONTH=" + shift.getMonth_id()
-				+ " AND CAL_YEAR=" + shift.getYear());
-
-		while (srs.next()) {
-			shift.setCalendar_id(String.valueOf(srs.getInt("CAL_ID")));
-		}
+		shift.setCalendar_id(getCalendarId(shift.getMonth_id(),shift.getYear()));
 
 	}
 
@@ -521,6 +549,75 @@ public class ShiftRepository extends RepositoryCommon{
 			e.printStackTrace();
 		}
 		return userShift;
+	}
+
+	public List<AttendanceVariance> getAttendanceVariance(String month, String year) {
+		List<AttendanceVariance> shift=null;
+		if (month == null || year == null) {
+			java.util.Date date = new Date();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+			year = String.valueOf(cal.get(Calendar.YEAR));
+		}
+		SqlRowSet srs;
+		try {
+			srs = jdbcTemplate
+					.queryForRowSet("select distinct att_emp_id,date,att_punchtime,user_name ,att_date,user_id,att_calendar_id,cal_id,cal_month, cal_year " + 
+							"from  userdata  " + 
+							"join (select att_emp_id,att_date date,att_punchtime,att_calendar_id,CONVERT(extract (DAY from ATT_DATE),SQL_VARCHAR) att_date from attendance) on user_emp_id=att_emp_id " + 
+							"join calendar on cal_id=att_calendar_id " + 
+							"left join (select distinct data_user_id,CONVERT((a.dates),SQL_VARCHAR) act_date,data_calendar_id,cal_month,cal_year  " + 
+							"from  " + 
+							"shiftdata_actual " + 
+							", calendar " + 
+							", unnest(REGEXP_SUBSTRING_ARRAY(data_dates, '\\d+')) a(dates)  " + 
+							"where cal_id=data_calendar_id " + 
+							") data on data.data_user_id=user_id and att_date=act_date  " + 
+							"where act_date is null  " + 
+							"and cal_month=? and cal_year=?  " + 
+							"and att_punchtime < (select stat_value from static_data where stat_name='SHIFT_MIN_THRESHOLD')  " + 
+							"order by att_emp_id,date ",month,year);
+			
+			shift=mapper.mapTimeDeficit(srs);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return shift;
+	}
+
+	public void updateAttendance(List<Attendance> mapAttendanceSheet) throws Exception {
+		int cal_id = getCalendarId(Integer.parseInt(mapAttendanceSheet.get(0).getDate().split("-")[1]), 
+				Integer.parseInt(mapAttendanceSheet.get(0).getDate().split("-")[0]));
+		ArrayList<Integer> existingEmpId = getExistingEmpId();
+		System.out.println(existingEmpId.size());
+		
+		for (int i = 0; i < mapAttendanceSheet.size(); i += UPDATE_BATCH_SIZE) {
+			final List<Attendance> batchList = mapAttendanceSheet.subList(i, i
+					+ UPDATE_BATCH_SIZE > mapAttendanceSheet.size() ? mapAttendanceSheet.size() : i
+					+ UPDATE_BATCH_SIZE);
+			jdbcTemplate.batchUpdate(attMergeQuery,
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement pStmt, int j)
+								throws SQLException {
+							Attendance att = batchList.get(j);
+
+							pStmt.setString(1, att.getDate());
+							pStmt.setInt(2, att.getEmp_id());
+							pStmt.setDouble(3, att.getPunch_time());
+							pStmt.setTimestamp(4,Timestamp.valueOf(LocalDateTime.now()));
+							pStmt.setString(5, "ADMIN");
+							pStmt.setInt(6, cal_id);
+						}
+						@Override
+						public int getBatchSize() {
+							return batchList.size();
+						}
+					});
+		}
+		
+		
 	}
 
 }

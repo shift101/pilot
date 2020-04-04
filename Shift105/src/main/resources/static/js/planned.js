@@ -81,7 +81,7 @@ ns.model = (function() {
             .done(function(data) {
                 ns.exceptions=data;
                 for (let i=0, l=ns.exceptions.length; i < l; i++){
-    				ns.classes.push(ns.exceptions[i].excp_name);
+                	if(ns.exceptions[i].excp_plan === 'Y')ns.classes.push(ns.exceptions[i].excp_name);
     			}
             })
             .fail(function(xhr, textStatus, errorThrown) {
@@ -207,13 +207,13 @@ ns.view = (function() {
 
             // clear the table
             $('.shifts table > tbody').empty();
-			rows+=`<tr><td></td><td></td>`;
+			rows+=`<tr class="head"><td></td><td></td>`;
 			for (let i=0, l=days.length; i < l; i++){
 				rows = rows+`<th scope="col">`+days[i]+`</th>`;
 			}
 			rows+=`</tr>`;
 			
-			rows+=`<tr><td>Resource</td><td>Shift</td>`;
+			rows+=`<tr class="head"><td>Resource</td><td>Shift</td>`;
 			for (let i=0, l=dates.length; i < l; i++){
 				rows = rows+`<th scope="col">`+dates[i]+`</th>`;
 			}
@@ -223,7 +223,7 @@ ns.view = (function() {
 			let userShifts=shifts.usershift;
             if (shifts) {
 				for (let i=0, l=userShifts.length; i < l; i++) {
-					rows = rows+`<tr class="datarow">`;
+					rows = rows+`<tr class="datarow small">`;
 					rows+=`<td class="resourcename"  ignore="true"><select id="user" name="user_id" disabled><option value="0000">-None-</option>`;
 					for (let j=0, l=ns.users.length; j < l; j++){
 						rows = rows+`<option value="`+ns.users[j].userId+`"`;
@@ -248,12 +248,12 @@ ns.view = (function() {
 						var out=false;
 						$.each(userShifts[i].exceptionData,function(key,value){							
 							if(value.dates.indexOf(dates[j]) > -1){
-								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false"><small>`+value.excp_name+`</small></td>`;
+								rows=rows + `<td class="`+value.excp_name+` datetoggle" data_id="`+value.data_Id+`" id="datedata" ignore="false">`+value.excp_name+`</td>`;
 								out=true;
 								return false;
 							}							
 						});
-						if(out == false)rows=rows + `<td class="WD datetoggle" id="datedata" ignore="false">WD</td>`;
+						if(out == false)rows=rows + `<td class="WD datetoggle" id="datedata" ignore="false"></td>`;
 												
 					}
 					rows=rows + `</tr>`;
@@ -278,7 +278,7 @@ ns.view = (function() {
             
 		},
 		addBlankRow: function() {
-			let rows = `<tr class="datarow">`;
+			let rows = `<tr class="datarow small">`;
 				
 			rows+=`<td class="resourcename" ignore="true"><select id="user" name="user_id"><option value="0000" default=true>-None-</option>`;
 			for (let i=0, l=ns.users.length; i < l; i++){
@@ -293,7 +293,7 @@ ns.view = (function() {
 			rows+=`</select></td>`;
 			
 			for (let i=0, l=ns.dates.length; i < l; i++){
-				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false"><small>WD</small></td>`;
+				rows = rows+`<td class="WD datetoggle" id="datedata" ignore="false"></td>`;
 			}
 			
 			rows+=`</tr>`;
@@ -327,6 +327,7 @@ ns.controller = (function(m, v) {
 	$('.shifts').hide();
 	$('.btn-update').hide();
 	$('.btn-generate').hide();
+	$('.error').hide();
     let model = m,
         view = v,
         $event_pump = $('body');

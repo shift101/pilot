@@ -195,6 +195,8 @@ ns.view = (function() {
 			//console.log("Year:"+shifts.year);
 			let dates=this.getDatesInMonth(shifts.month_id-1,shifts.year);
 			let days = this.getDaysInMonth(shifts.month_id-1,shifts.year);
+			//$('#year').val(shifts.year);
+			//$('#month').val(shifts.month_id);
 			//console.log("days:"+dates);
 			//console.log("days:"+days);
 			//console.log(shifts.usershift[0].user_name);
@@ -210,13 +212,13 @@ ns.view = (function() {
 		  */
             // clear the table
             $('.shifts table > tbody').empty();
-			rows+=`<tr><td></td><td></td>`;
+			rows+=`<tr class="head"><td></td><td></td>`;
 			for (let i=0, l=days.length; i < l; i++){
 				rows = rows+`<th scope="col">`+days[i]+`</th>`;
 			}
 			rows+=`</tr>`;
 			
-			rows+=`<tr><td></td><td>Shift</td>`;
+			rows+=`<tr class="head"><td></td><td>Shift</td>`;
 			for (let i=0, l=dates.length; i < l; i++){
 				rows = rows+`<th scope="col">`+dates[i]+`</th>`;
 			}
@@ -248,35 +250,13 @@ ns.view = (function() {
 							}
 							
 						});
-						if(out == false)rows=rows + `<td class="WD"><small>WD</small></td>`;
-						/*if(!(userShifts[i].weekoff == null) && Array.isArray(userShifts[i].weekoff.dates) && userShifts[i].weekoff.dates.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="weekoff">WO</td>`;
-							console.log('entering weekoff');
-						}else if(!(userShifts[i].leave == null) && Array.isArray(userShifts[i].leave.dates) && userShifts[i].leave.dates.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="plan-leave">PL</td>`;
-							console.log('entering leave');
-						}else if(!(userShifts[i].unplannedLeave == null) && Array.isArray(userShifts[i].unplannedLeave.dates) && userShifts[i].unplannedLeave.dates.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="unplan-leave">UL</td>`;
-							console.log('entering unplan');
-						}else if(!(userShifts[i].specialLeave == null) && Array.isArray(userShifts[i].specialLeave.dates) && userShifts[i].specialLeave.dates.indexOf(dates[j]) > -1){
-							rows=rows + `<td class="special-leave">SL</td>`;
-							console.log('entering special');
-						}*/
-						
-						/*else{
-							
-							rows=rows + `<td class="weekday">WD</td>`;
-						}*/
+						if(out == false)rows=rows + `<td class="WD"></td>`;
+
 					}
 					rows=rows + `</tr>`;
 				}
 				
 				
-				/*
-				for (let i=0, l=people.length; i < l; i++) {
-                    rows += `<tr><td class="fname">${people[i].fname}</td><td class="lname">${people[i].lname}</td><td>${people[i].timestamp}</td></tr>`;
-                }
-				*/
                 $('.shifts table > tbody').append(rows);
             }
         },
@@ -299,12 +279,21 @@ ns.controller = (function(m, v) {
         $event_pump = $('body'),
         $month = $('#month'),
         $year = $('#year');
+    $('.error').hide();
 
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
     	view.addMonthDropDown();
-    	model.readByMonthYear(12,2019);
+    	model.read();
     }, 100);
+    
+    $(function(){
+        var includes = $('[data-include]');
+        jQuery.each(includes, function(){
+          var file = $(this).data('include') + '.html';
+          $(this).load(file);
+        });
+      });
     
     $("#month").change(function() {
   	  model.getYears();
@@ -322,52 +311,6 @@ ns.controller = (function(m, v) {
     			    }, 5000);
     	}  	  
   	});
-
-    // Validate input
-    /*function validate(fname, lname) {
-        return fname !== "" && lname !== "";
-    }*/
-
-    // Create our event handlers
-    /*$('#create').click(function(e) {
-        let fname = $fname.val(),
-            lname = $lname.val();
-
-        e.preventDefault();
-
-        if (validate(fname, lname)) {
-            model.create(fname, lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-    });
-
-    $('#update').click(function(e) {
-        let fname = $fname.val(),
-            lname = $lname.val();
-
-        e.preventDefault();
-
-        if (validate(fname, lname)) {
-            model.update(fname, lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-        e.preventDefault();
-    });
-
-    $('#delete').click(function(e) {
-        let lname = $lname.val();
-
-        e.preventDefault();
-
-        if (validate('placeholder', lname)) {
-            model.delete(lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-        e.preventDefault();
-    });*/
     
     $('#submit').click(function(e) {
 
